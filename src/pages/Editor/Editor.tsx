@@ -15,6 +15,7 @@ import {
 import RightSidebar from "../../components/layout/editor/RightSidebar";
 import LeftSidebar from "../../components/layout/editor/LeftSidebar";
 import { LiveMap } from "@liveblocks/client";
+import { ConnectivityStatus } from "../../components/ui/ConnectivityStatus";
 
 export default function Editor() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -242,6 +243,7 @@ export default function Editor() {
   return (
     <>
       <main className="h-screen w-screen overflow-hidden">
+        <ConnectivityStatus />
         <Navbar
           activeElement={activeElement}
           imageInputRef={imageInputRef}
