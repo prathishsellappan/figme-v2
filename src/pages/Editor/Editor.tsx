@@ -16,8 +16,13 @@ import RightSidebar from "../../components/layout/editor/RightSidebar";
 import LeftSidebar from "../../components/layout/editor/LeftSidebar";
 import { LiveMap } from "@liveblocks/client";
 import { ConnectivityStatus } from "../../components/ui/ConnectivityStatus";
+import type { DesignDocument } from "../../lib/documents";
 
-export default function Editor() {
+type Props = {
+  document: DesignDocument;
+};
+
+export default function Editor({ document }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<Canvas | null>(null);
 
@@ -196,6 +201,8 @@ export default function Editor() {
     };
 
     const keyDownHandler = (e: KeyboardEvent) => {
+      if (!fabricRef.current) return;
+
       handleKeyDown({
         e,
         canvas: fabricRef.current,
@@ -246,6 +253,11 @@ export default function Editor() {
         <ConnectivityStatus />
         <Navbar
           activeElement={activeElement}
+          documentId={document.id}
+          documentTitle={document.title}
+          ownerId={document.ownerId}
+          ownerEmail={document.ownerEmail}
+          collaboratorEmails={document.collaboratorEmails}
           imageInputRef={imageInputRef}
           handleImageUpload={(e: any) => {
             e.stopPropagation();

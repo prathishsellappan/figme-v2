@@ -4,7 +4,17 @@ import ShapesMenu from "../../ShapesMenu";
 import ActiveUsers from "./users/ActiveUsers";
 import ObjectDesignFile from "../../ObjectDesignFile";
 
-export default function Navbar({ activeElement, handleActiveElement, imageInputRef, handleImageUpload }: NavbarProps) {
+export default function Navbar({
+    activeElement,
+    handleActiveElement,
+    imageInputRef,
+    handleImageUpload,
+    documentId,
+    documentTitle,
+    ownerId,
+    ownerEmail,
+    collaboratorEmails,
+}: NavbarProps) {
 
     const isActive = (value: string | Array<ActiveElement>) => {
         return (typeof value === 'string' && activeElement && activeElement.value === value) ||
@@ -60,8 +70,13 @@ export default function Navbar({ activeElement, handleActiveElement, imageInputR
 
 
             </div>
-            <ObjectDesignFile />
-            <ActiveUsers />
+            <ObjectDesignFile documentId={documentId} title={documentTitle} />
+            <ActiveUsers
+              documentId={documentId}
+              ownerId={ownerId}
+              ownerEmail={ownerEmail}
+              collaboratorEmails={collaboratorEmails}
+            />
         </nav>
     );
 }

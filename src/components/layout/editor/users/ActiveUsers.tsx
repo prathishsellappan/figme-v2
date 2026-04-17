@@ -1,10 +1,21 @@
 import { useMemo } from "react";
 import Avatar from "./Avatar";
 import { useOthers, useSelf } from "@liveblocks/react/suspense";
-import { generateRandomName } from "../../../../lib/utils";
 import ShareBtn from "../../../share/ShareBtn";
 
-const ActiveUsers = () => {
+type Props = {
+  documentId: string;
+  ownerId: string;
+  ownerEmail: string;
+  collaboratorEmails: string[];
+};
+
+const ActiveUsers = ({
+  documentId,
+  ownerId,
+  ownerEmail,
+  collaboratorEmails,
+}: Props) => {
   const others = useOthers();
   const currentUser = useSelf();
 
@@ -17,7 +28,12 @@ const ActiveUsers = () => {
 
         <div className='flex items-center justify-center gap-1 pl-1'>
           <div className="pr-5">
-            <ShareBtn />
+            <ShareBtn
+              documentId={documentId}
+              ownerId={ownerId}
+              ownerEmail={ownerEmail}
+              collaboratorEmails={collaboratorEmails}
+            />
           </div>
           <div className="p-3 pb-1 pl-2 border-l-[0.5px] border-borderColor">
 
@@ -28,7 +44,7 @@ const ActiveUsers = () => {
             {others.slice(0, 2).map(({ connectionId }) => (
               <Avatar
                 key={connectionId}
-                name={generateRandomName()}
+                name={`Guest ${connectionId}`}
                 otherStyles='-ml-3'
               />
             ))}
@@ -43,7 +59,7 @@ const ActiveUsers = () => {
         </div>
       </>
     );
-  }, [others.length]);
+  }, [collaboratorEmails, documentId, others.length, ownerEmail, ownerId, currentUser]);
 
   return memoizedUsers;
 };

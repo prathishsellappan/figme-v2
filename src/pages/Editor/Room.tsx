@@ -9,10 +9,16 @@ const public_Key = import.meta.env.VITE_LIVEBLOCK_API;
 
 
 
-const Room = ({ children }: { children: React.ReactNode }) => {
+const Room = ({
+    children,
+    roomId,
+}: {
+    children: React.ReactNode;
+    roomId: string;
+}) => {
     return (
         <LiveblocksProvider publicApiKey={public_Key}>
-            <RoomProvider id='figma-clone'
+            <RoomProvider id={roomId}
                 initialPresence={{ cursor: null, cursorColor: null, editingText: null }}
                 initialStorage={{
                     canvasObjects: new LiveMap(),

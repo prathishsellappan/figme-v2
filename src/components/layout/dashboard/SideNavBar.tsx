@@ -6,7 +6,9 @@ import { Input } from "../../common/ui/input";
 import PlansBox from "../../common/ui/PlansBox";
 
 export default function SideNavBar({ onRecentClick, onDraftClick, recActive, draftActive }: SideNavBarProp) {
-    const { dispatch } = useAuth();
+    const { state, dispatch } = useAuth();
+    const displayName = state.user?.displayName || state.user?.email?.split("@")[0] || "User";
+    const avatarLetter = displayName.charAt(0).toUpperCase();
 
     const logoutHandler = async () => {
         try {
@@ -25,9 +27,9 @@ export default function SideNavBar({ onRecentClick, onDraftClick, recActive, dra
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[13px]">
                         <div className="bg-green-500 rounded-full w-7 h-7 flex items-center justify-center text-white text-sm">
-                            O
+                            {avatarLetter}
                         </div>
-                        <p className="text-white text-[15px] font-medium">Osama Zaid</p>
+                        <p className="text-white text-[15px] font-medium">{displayName}</p>
                     </div>
                     <div className="cursor-pointer">
                         <img src={notificationIcon} alt="notification" width={20} />
@@ -59,7 +61,7 @@ export default function SideNavBar({ onRecentClick, onDraftClick, recActive, dra
                     onClick={onDraftClick}
                 >
                     <img src={draftIcon} alt="draftIcon" width={17} />
-                    <p className="text-[15px]">Draft</p>
+                    <p className="text-[15px]">Drafts (soon)</p>
                 </div>
             </div>
 

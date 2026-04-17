@@ -15,7 +15,7 @@ export interface AuthFormGenericProp {
 
 export interface AuthContextType {
     user: firebase.User | undefined;
-};
+}
 
 
 

@@ -1,23 +1,54 @@
-export default function DesignFileObjects({ }) {
-  return (
-    <>
-      <div className="m-5 p-6 pt-0 pl-2 grid grid-cols-4 gap-10">
+import type { DesignDocument } from "../lib/documents";
 
-        <div className="space-y-2 space-x-1">
-          <div
-            className="bg-[#1E1E1E]  border-[0.5px] border-borderColor 
-             w-96 h-60 rounded-xl bg-center bg-cover bg-no-repeat bg-contain"
-            // style={{ backgroundImage: `url(${thumbnailBg})` }}
-          ></div>
+type Props = {
+  documents: DesignDocument[];
+  onOpen: (documentId: string) => void;
+  emptyLabel: string;
+};
 
+const formatUpdatedAt = (dateValue: DesignDocument["updatedAt"]) => {
+  if (!dateValue) return "Just created";
 
-          <div className="text-white text-sm">
-            <h4>Digma Board UI</h4>
-            <p className="text-opacity-50 text-white">Edited 2 minutes ago</p>
-          </div>
-        </div>
+  return `Updated ${dateValue.toDate().toLocaleString()}`;
+};
 
+export default function DesignFileObjects({
+  documents,
+  onOpen,
+  emptyLabel,
+}: Props) {
+  if (documents.length === 0) {
+    return (
+      <div className="m-5 rounded-xl border border-dashed border-borderColor bg-[#202124] p-6 text-sm text-[#b9bcc2]">
+        {emptyLabel}
       </div>
+    );
+  }
 
-    </>)
+  return (
+    <div className="m-5 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+      {documents.map((documentItem) => (
+        <button
+          key={documentItem.id}
+          type="button"
+          onClick={() => onOpen(documentItem.id)}
+          className="space-y-3 rounded-xl border border-borderColor bg-[#202124] p-4 text-left text-white transition-colors hover:border-[#0C8CE9] hover:bg-[#25272a]"
+        >
+          <div className="flex h-44 items-center justify-center rounded-lg border border-borderColor bg-[#1E1E1E] text-sm text-[#b9bcc2]">
+            {documentItem.title}
+          </div>
+
+          <div className="space-y-1">
+            <h4 className="text-base font-medium">{documentItem.title}</h4>
+            <p className="text-sm text-[#9aa0a6]">
+              {formatUpdatedAt(documentItem.updatedAt)}
+            </p>
+            <p className="text-xs uppercase tracking-wide text-[#6f7680]">
+              Room {documentItem.roomId.slice(0, 8)}
+            </p>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
 }

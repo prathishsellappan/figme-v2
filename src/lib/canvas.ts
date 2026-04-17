@@ -9,14 +9,10 @@ import {
   CanvasPathCreated,
   CanvasSelectionCreated,
   RenderCanvas
-  ,
 } from "../types/IEditorProps";
 import { createSpecificShape } from "./shapes";
 import { defaultNavElement } from "../utils";
-import { IEvent } from "fabric/fabric-impl";
-
-
-
+import { TEvent } from "fabric";
 
 type initializeFabricProps = {
   fabricRef: React.MutableRefObject<fabric.Canvas | null>;
@@ -26,6 +22,9 @@ type initializeFabricProps = {
 // initialize fabric canvas
 export const initializeFabric = ({ fabricRef, canvasRef }: initializeFabricProps) => {
   const mainCanvas = document.getElementById("canvas");
+  if (!canvasRef.current) {
+    throw new Error("Canvas element is not available");
+  }
 
   // create fabric canvas
   const canvas = new fabric.Canvas(canvasRef.current, {
@@ -50,14 +49,16 @@ export const handleCanvasMouseDown = (
   }: CanvasMouseDown) => {
   // get the pointer that inisde the canvas
   const pointer = canvas.getPointer(options.e);
-  const target = canvas.findTarget(options.e, false);
+  const target = canvas.findTarget(options.e);
   canvas.isDrawingMode = false;
 
 
   if (selectedShapeRef.current === "freeform") {
     isDrawing.current = true;
     canvas.isDrawingMode = true;
-    canvas.freeDrawingBrush.width = 5;
+    if (canvas.freeDrawingBrush) {
+      canvas.freeDrawingBrush.width = 5;
+    }
     return;
   }
 
@@ -75,11 +76,12 @@ export const handleCanvasMouseDown = (
   }
 
   else {
+    if (!selectedShapeRef.current) return;
     isDrawing.current = true;
     // create custom fabric object/shape and set it to shapeRef
     shapeRef.current = createSpecificShape(
       selectedShapeRef.current,
-      pointer as any
+      pointer
     );
 
     // if shapeRef is not null, add it to canvas
@@ -119,7 +121,7 @@ export const handleCanvaseMouseMove = ({
       break;
 
     case "circle":
-      shapeRef.current.set({
+      shapeRef.current?.set({
         radius: Math.abs(pointer.x - (shapeRef.current?.left || 0)) / 2,
       });
       break;
@@ -143,6 +145,7 @@ export const handleCanvaseMouseMove = ({
         width: pointer.x - (shapeRef.current?.left || 0),
         height: pointer.y - (shapeRef.current?.top || 0),
       });
+      break;
 
     default:
       break;
@@ -153,9 +156,12 @@ export const handleCanvaseMouseMove = ({
   canvas.renderAll();
 
   // sync shape in storage
-  if (shapeRef.current?.objectId) {
-    console.log(shapeRef.current)
-    syncShapeInStorage(shapeRef.current);
+  const currentShape = shapeRef.current as
+    | (fabric.FabricObject & { objectId?: string })
+    | null;
+  if (currentShape?.objectId) {
+    console.log(currentShape)
+    syncShapeInStorage(currentShape);
   }
 };
 
@@ -173,7 +179,9 @@ export const handleCanvasMouseUp = ({
   if (selectedShapeRef.current === "freeform") return;
 
   // sync shape in storage as drawing is stopped
-  syncShapeInStorage(shapeRef.current);
+  if (shapeRef.current) {
+    syncShapeInStorage(shapeRef.current);
+  }
 
   // set everything to null
   shapeRef.current = null;
@@ -198,7 +206,10 @@ export const handleCanvasObjectModified = ({
   if (!target) return;
 
   if (target?.type == "activeSelection") {
-    // fix this
+    const activeSelection = target as fabric.ActiveSelection;
+    activeSelection.getObjects().forEach((object) => {
+      syncShapeInStorage(object);
+    });
   } else {
     syncShapeInStorage(target);
   }
@@ -303,24 +314,31 @@ export const handleCanvasSelectionCreated = ({
   if (selectedElement && options.selected.length === 1) {
     // calculate scaled dimensions of the object
     const scaledWidth = selectedElement?.scaleX
-      ? selectedElement?.width! * selectedElement?.scaleX
+      ? (selectedElement.width || 0) * selectedElement.scaleX
       : selectedElement?.width;
 
     const scaledHeight = selectedElement?.scaleY
-      ? selectedElement?.height! * selectedElement?.scaleY
+      ? (selectedElement.height || 0) * selectedElement.scaleY
       : selectedElement?.height;
+
+    const textElement = selectedElement as fabric.IText;
+    const fill =
+      typeof selectedElement.fill === "string" ? selectedElement.fill : "";
+    const stroke =
+      typeof selectedElement.stroke === "string" ? selectedElement.stroke : "";
 
     setElementAttributes({
       width: scaledWidth?.toFixed(0).toString() || "",
       height: scaledHeight?.toFixed(0).toString() || "",
-      fill: selectedElement?.fill?.toString() || "",
-      stroke: selectedElement?.stroke || "",
-      // @ts-ignore
-      fontSize: selectedElement?.fontSize || "",
-      // @ts-ignore
-      fontFamily: selectedElement?.fontFamily || "",
-      // @ts-ignore
-      fontWeight: selectedElement?.fontWeight || "",
+      fill,
+      stroke,
+      fontSize: textElement.fontSize?.toString() || "",
+      fontFamily: textElement.fontFamily || "",
+      fontWeight:
+        typeof textElement.fontWeight === "string" ||
+        typeof textElement.fontWeight === "number"
+          ? textElement.fontWeight.toString()
+          : "",
     });
   }
 };
@@ -331,14 +349,15 @@ export const handleCanvasObjectScaling = ({
   setElementAttributes,
 }: CanvasObjectScaling) => {
   const selectedElement = options.target;
+  if (!selectedElement) return;
 
   // calculate scaled dimensions of the object
   const scaledWidth = selectedElement?.scaleX
-    ? selectedElement?.width! * selectedElement?.scaleX
+    ? (selectedElement.width || 0) * selectedElement.scaleX
     : selectedElement?.width;
 
   const scaledHeight = selectedElement?.scaleY
-    ? selectedElement?.height! * selectedElement?.scaleY
+    ? (selectedElement.height || 0) * selectedElement.scaleY
     : selectedElement?.height;
 
   setElementAttributes((prev) => ({
@@ -361,8 +380,6 @@ export const renderCanvas = async ({
   // Debugging: Log current canvasObjects
   console.log('Canvas Objects:', canvasObjects);
 
-
-
   const objectsArray = Array.from(canvasObjects.values());
   try {
     const enlivenedObjects = await fabric.util.enlivenObjects<fabric.FabricObject>(objectsArray);
@@ -371,7 +388,7 @@ export const renderCanvas = async ({
     console.log('Enlivened Objects:', enlivenedObjects);
 
     enlivenedObjects.forEach((obj, i) => {
-      if (activeObjectRef.current?.objectId === i) {
+      if ((activeObjectRef.current as (fabric.FabricObject & { objectId?: string }) | null)?.objectId === String(i)) {
         fabricRef.current?.setActiveObject(obj);
       }
 
@@ -382,7 +399,7 @@ export const renderCanvas = async ({
   } catch (error) {
     console.error('Failed to enliven objects:', error);
   }
-}
+};
 
 // Resize canvas dimensions on window resize
 export const handleResize = ({ canvas }: { canvas: fabric.Canvas | null }) => {
@@ -400,7 +417,7 @@ export const handleCanvasZoom = ({
   options,
   canvas,
 }: {
-  options: IEvent & { e: WheelEvent };
+  options: TEvent<WheelEvent>;
   canvas: fabric.Canvas;
 }) => {
   const delta = options.e.deltaY;
@@ -416,14 +433,14 @@ export const handleCanvasZoom = ({
 
   // Set zoom to canvas
   // zoomToPoint: http://fabricjs.com/docs/fabric.Canvas.html#zoomToPoint
-  canvas.zoomToPoint({ x: options.e.offsetX, y: options.e.offsetY }, zoom);
+  canvas.zoomToPoint(
+    new fabric.Point(options.e.offsetX, options.e.offsetY),
+    zoom
+  );
 
   options.e.preventDefault();
   options.e.stopPropagation();
 };
-
-
-
 
 
 

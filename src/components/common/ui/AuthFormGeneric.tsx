@@ -40,10 +40,15 @@ const formSchema = z.object({
 export function AuthFormGeneric({ loginOrRegister }: AuthFormGenericProp) {
   const { state, dispatch } = useAuth();
   const navigate = useNavigate();
-
-  if (state.loading) {
-    return <p>Loading...</p>;
-  }
+  const [isFocusedE, setIsFocusedEmail] = useState(false);
+  const [isFocusedP, setIsFocusedPassword] = useState(false);
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
   //TODO: add user handlers events helpers e.g. you have been login successful est..
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -79,16 +84,9 @@ export function AuthFormGeneric({ loginOrRegister }: AuthFormGenericProp) {
     }
   };
 
-  const [isFocusedE, setIsFocusedEmail] = useState(false);
-  const [isFocusedP, setIsFocusedPassword] = useState(false);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  if (state.loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <Form {...form}>

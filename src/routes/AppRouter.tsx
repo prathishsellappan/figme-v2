@@ -4,12 +4,11 @@ import ProtectedRoutes from '../utils/routes/ProtectedRoutes';
 
 import Login from '../pages/Auth/Login';
 
-import Editor from '../pages/Editor/Editor';
-
 import PublicRoutesWithRules from '../utils/routes/PublicRoutesWithRules';
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Register from '../pages/Auth/Register';
 import Verify from '../pages/Auth/Verify';
+import DocumentEditor from '../pages/Editor/DocumentEditor';
 
 
 /*
@@ -41,9 +40,7 @@ const AppRouter: React.FC = () => {
         <Route element={<ProtectedRoutes />}>
           <Route path='/' element={<Dashboard />} />
           <Route path='/dashboard' element={<Dashboard />} />
-          <Route path='/editor' element={<Editor />}>
-            {/* <Route path='/editor/newfile' element={<Editor />} /> */}
-          </Route>
+          <Route path='/editor/:documentId' element={<DocumentEditor />} />
         </Route>
 
 
