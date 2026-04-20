@@ -1,6 +1,24 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import PlanTypeBadge from "./common/ui/PlanTypeBadge";
+import { updateDesignDocumentTitle } from "../lib/documents";
+
+type Props = {
+  documentId: string;
+  title: string;
+};
+
+export default function ObjectDesignFile({ documentId, title }: Props) {
+  const [draftTitle, setDraftTitle] = useState(title);
+
+  useEffect(() => {
+    setDraftTitle(title);
+  }, [title]);
+
+  const handleBlur = async () => {
+    if (!draftTitle.trim() || draftTitle === title) return;
+    await updateDesignDocumentTitle(documentId, draftTitle);
+  };
 
 export default function ObjectDesignFile() {
   const [searchParams] = useSearchParams();

@@ -1,3 +1,5 @@
+import { DesignDocument, DocumentStatus } from "../lib/documents";
+
 export type SideNavBarProp = {
     onRecentClick: ()=> void,
     onDraftClick: ()=> void,
@@ -6,13 +8,7 @@ export type SideNavBarProp = {
 }
 
 export type ContentProp = {
-    recentOrDraft: string
+    recentOrDraft: DocumentStatus
 }
 
-export type DesignFileProp = {
-    id: number,
-    fileName: string,
-    createdAt: Date,
-    updatedAt: Date,
-    thumbnail: string,    
-}
+export type DesignFileProp = DesignDocument;

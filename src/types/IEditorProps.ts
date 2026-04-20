@@ -1,5 +1,5 @@
 import { BaseUserMeta, User } from "@liveblocks/client";
-import { Canvas, FabricObject, Gradient, Path, Pattern, TEvent } from "fabric";
+import { Canvas, FabricObject, Path, TEvent } from "fabric";
 
 export enum CursorMode {
   Hidden,
@@ -64,6 +64,11 @@ export type NavbarProps = {
   imageInputRef: React.MutableRefObject<HTMLInputElement | null>;
   handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleActiveElement: (element: ActiveElement) => void;
+  documentId: string;
+  documentTitle: string;
+  ownerId: string;
+  ownerEmail: string;
+  collaboratorEmails: string[];
 };
 
 
@@ -75,7 +80,7 @@ export interface CustomFabricObject<T extends FabricObject = FabricObject>
 export type ModifyShape = {
   canvas: Canvas;
   property: string;
-  value: any;
+  value: string;
   activeObjectRef: React.MutableRefObject<FabricObject | null>;
   syncShapeInStorage: (shape: FabricObject) => void;
 };
@@ -99,7 +104,7 @@ export type RightSidebarProps = {
   fabricRef: React.RefObject<Canvas | null>;
   activeObjectRef: React.RefObject<FabricObject | null>;
   isEditingRef: React.MutableRefObject<boolean>;
-  syncShapeInStorage: (obj: any) => void;
+  syncShapeInStorage: (obj: FabricObject) => void;
 };
 
 
@@ -110,70 +115,81 @@ export type ShapesMenuProps = {
     icon: string;
     value: Array<ActiveElement>;
   };
-  activeElement: any;
-  handleActiveElement: any;
-  handleImageUpload: any;
-  imageInputRef: any;
+  activeElement: ActiveElement;
+  handleActiveElement: (element: ActiveElement) => void;
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  imageInputRef: React.MutableRefObject<HTMLInputElement | null>;
 };
 
-export type Presence = any;
+export type Presence = {
+  cursor: { x: number; y: number } | null;
+  cursorColor?: string | null;
+  editingText?: string | null;
+  message?: string | null;
+};
 
 export type LiveCursorProps = {
   others: readonly User<Presence, BaseUserMeta>[];
 };
 
+export type CanvasPointerEvent = TEvent<MouseEvent> & {
+  target?: FabricObject;
+  selected?: FabricObject[];
+  path?: Path;
+};
+
 export type CanvasMouseDown = {
-  options: TEvent;
+  options: CanvasPointerEvent;
   canvas: Canvas;
-  selectedShapeRef: any;
+  selectedShapeRef: React.MutableRefObject<string | null>;
   isDrawing: React.MutableRefObject<boolean>;
   shapeRef: React.MutableRefObject<FabricObject | null>;
 };
 
 export type CanvasMouseMove = {
-  options: TEvent;
+  options: CanvasPointerEvent;
   canvas: Canvas;
   isDrawing: React.MutableRefObject<boolean>;
-  selectedShapeRef: any;
-  shapeRef: any;
+  selectedShapeRef: React.MutableRefObject<string | null>;
+  shapeRef: React.MutableRefObject<FabricObject | null>;
   syncShapeInStorage: (shape: FabricObject) => void;
 };
 
 export type CanvasMouseUp = {
   canvas: Canvas;
   isDrawing: React.MutableRefObject<boolean>;
-  shapeRef: any;
+  shapeRef: React.MutableRefObject<FabricObject | null>;
   activeObjectRef: React.MutableRefObject<FabricObject | null>;
-  selectedShapeRef: any;
+  selectedShapeRef: React.MutableRefObject<string | null>;
   syncShapeInStorage: (shape: FabricObject) => void;
-  setActiveElement: any;
+  setActiveElement: React.Dispatch<React.SetStateAction<ActiveElement>>;
 };
 
 export type CanvasObjectModified = {
-  options: TEvent;
+  options: CanvasPointerEvent;
   syncShapeInStorage: (shape: FabricObject) => void;
 };
 
 export type CanvasPathCreated = {
-  options: (TEvent & { path: CustomFabricObject<Path> }) | any;
+  options: CanvasPointerEvent;
   syncShapeInStorage: (shape: FabricObject) => void;
 };
 
 export type CanvasSelectionCreated = {
-  options: TEvent;
+  options: CanvasPointerEvent;
   isEditingRef: React.MutableRefObject<boolean>;
   setElementAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
 };
 
 export type CanvasObjectScaling = {
-  options: TEvent;
+  options: CanvasPointerEvent;
   setElementAttributes: React.Dispatch<React.SetStateAction<Attributes>>;
 };
 
 export type RenderCanvas = {
   fabricRef: React.MutableRefObject<Canvas | null>;
-  canvasObjects: any;
-  activeObjectRef: any;
+  canvasObjects: { values(): IterableIterator<unknown> };
+  activeObjectRef: React.MutableRefObject<FabricObject | null>;
   canvas?: Canvas,
 };
 

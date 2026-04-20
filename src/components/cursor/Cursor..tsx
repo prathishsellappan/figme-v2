@@ -4,7 +4,7 @@ type Props = {
     color: string;
     x: number;
     y: number;
-    message: string;
+    message?: string | null;
 };
 
 export default function Cursor({ color, x, y, message }: Props) {
@@ -29,4 +29,3 @@ export default function Cursor({ color, x, y, message }: Props) {
         </div>
     );
 }
-

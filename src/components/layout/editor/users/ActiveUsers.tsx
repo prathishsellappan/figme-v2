@@ -1,11 +1,22 @@
 import { useMemo } from "react";
 import Avatar from "./Avatar";
 import { useOthers, useSelf } from "@liveblocks/react/suspense";
-import { generateRandomName } from "../../../../lib/utils";
 import ShareBtn from "../../../share/ShareBtn";
 import { FigmaLogoOutlineIcon } from "../../../../utils";
 
-const ActiveUsers = () => {
+type Props = {
+  documentId: string;
+  ownerId: string;
+  ownerEmail: string;
+  collaboratorEmails: string[];
+};
+
+const ActiveUsers = ({
+  documentId,
+  ownerId,
+  ownerEmail,
+  collaboratorEmails,
+}: Props) => {
   const others = useOthers();
   const currentUser = useSelf();
 
@@ -26,7 +37,7 @@ const ActiveUsers = () => {
             {others.slice(0, 2).map(({ connectionId }) => (
               <Avatar
                 key={connectionId}
-                name={generateRandomName()}
+                name={`Guest ${connectionId}`}
                 otherStyles='-ml-3'
               />
             ))}
@@ -43,7 +54,7 @@ const ActiveUsers = () => {
         </div>
       </div>
     );
-  }, [others.length]);
+  }, [collaboratorEmails, documentId, others.length, ownerEmail, ownerId, currentUser]);
 
   return memoizedUsers;
 };

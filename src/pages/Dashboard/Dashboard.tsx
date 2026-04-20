@@ -4,22 +4,14 @@ import Content from "../../components/layout/dashboard/Content";
 
 
 export default function Dashboard() {
-  const [showRecentContent, setShowRecentContent] = useState(true);
-  const [showDraftContent, setShowDraftContent] = useState(false);
-  const [recActive, setRecActive] = useState(true);
-  const [draftActive, setDraftActive] = useState(false);
+  const [activeSection, setActiveSection] = useState<"recent" | "draft">("recent");
+
   const handleRecentClick = () => {
-    setShowRecentContent(true);
-    setShowDraftContent(false);
-    setRecActive(true);
-    setDraftActive(false);
+    setActiveSection("recent");
   };
 
   const handleDraftClick = () => {
-    setShowRecentContent(false);
-    setShowDraftContent(true);
-    setRecActive(false);
-    setDraftActive(true);
+    setActiveSection("draft");
   };
 
   return (
@@ -27,17 +19,16 @@ export default function Dashboard() {
       <SideNavBar
         onRecentClick={handleRecentClick}
         onDraftClick={handleDraftClick}
-        recActive={recActive}
-        draftActive={draftActive}
+        recActive={activeSection === "recent"}
+        draftActive={activeSection === "draft"}
       />
 
       <div className="w-screen">
-        <Content recentOrDraft={showRecentContent ? 'recent' : 'draft'} />
+        <Content recentOrDraft={activeSection} />
       </div>
     </div>
   );
 }
-
 
 
 

@@ -3,7 +3,11 @@ import LiveCursors from "./cursor/LiveCursor";
 import { useMyPresence, useOthers } from "@liveblocks/react/suspense";
 import { shortcuts } from "../utils";
 import { useCallback, useEffect, useState } from "react";
-import { CursorMode, CursorState } from "../types/IEditorProps";
+import {
+  CursorMode,
+  CursorState,
+  LiveCursorProps,
+} from "../types/IEditorProps";
 import CursorChat from "./cursor/CursorChat";
 
 type Props = {
@@ -12,9 +16,24 @@ type Props = {
   redo: () => void;
 };
 
+type PresenceUpdate = (
+  presence: Partial<{
+    cursor: { x: number; y: number } | null;
+    cursorColor: string | null;
+    message: string | null;
+  }>
+) => void;
+
 export default function Live({ canvasRef, undo, redo }: Props) {
   const others = useOthers();
-  const [{ cursor }, updateMyPresence] = useMyPresence() as any;
+  const [myPresence, updateMyPresence] = useMyPresence();
+  const cursor =
+    myPresence.cursor &&
+    typeof myPresence.cursor === "object" &&
+    "x" in myPresence.cursor &&
+    "y" in myPresence.cursor
+      ? (myPresence.cursor as { x: number; y: number })
+      : null;
   const [cursorState, setCursorState] = useState<CursorState>({
     mode: CursorMode.Hidden,
   });
@@ -155,14 +174,14 @@ export default function Live({ canvasRef, undo, redo }: Props) {
               cursor={cursor}
               cursorState={cursorState}
               setCursorState={setCursorState}
-              updateMyPresence={updateMyPresence}
+              updateMyPresence={updateMyPresence as PresenceUpdate}
             />
           )}
 
 
 
           {/* Show the live cursors of other users */}
-          <LiveCursors others={others} />
+          <LiveCursors others={others as unknown as LiveCursorProps["others"]} />
 
           {/* Show the comments */}
           {/* <Comments /> */}
@@ -185,4 +204,3 @@ export default function Live({ canvasRef, undo, redo }: Props) {
     </>
   );
 }
-

@@ -17,7 +17,7 @@ export const createRectangle = (pointer: fabric.Point) => {
     objectId: uuidv4(),
     rx: 0,
     ry: 0,
-  } as unknown as CustomFabricObject<fabric.Rect>);
+  } as unknown as fabric.Rect & CustomFabricObject);
 
   return rect;
 };
@@ -30,7 +30,7 @@ export const createTriangle = (pointer: fabric.Point) => {
     height: 100,
     fill: "#fff",
     objectId: uuidv4(),
-  } as CustomFabricObject<fabric.Triangle>);
+  } as unknown as fabric.Triangle & CustomFabricObject);
 };
 
 export const createCircle = (pointer: fabric.Point) => {
@@ -40,7 +40,7 @@ export const createCircle = (pointer: fabric.Point) => {
     radius: 50,
     fill: "#aabbcc",
     objectId: uuidv4(),
-  } as CustomFabricObject<fabric.Circle>);
+  } as unknown as fabric.Circle & CustomFabricObject);
 };
 
 export const createLine = (pointer: fabric.Point) => {
@@ -50,7 +50,9 @@ export const createLine = (pointer: fabric.Point) => {
       stroke: "#aabbcc",
       strokeWidth: 2,
       objectId: uuidv4(),
-    } as CustomFabricObject<fabric.Line>
+    } as unknown as Partial<fabric.TClassProperties<fabric.Line>> & {
+      objectId: string;
+    }
   );
 };
 
@@ -63,12 +65,12 @@ export const createText = (pointer: fabric.Point, text: string) => {
     fontSize: 36,
     fontWeight: "400",
     objectId: uuidv4()
-  } as fabric.ITextOptions);
+  });
 };
 
 export const createSpecificShape = (
   shapeType: string,
-  pointer: PointerEvent
+  pointer: fabric.Point
 ) => {
   switch (shapeType) {
     case "rectangle":
@@ -98,22 +100,25 @@ export const handleImageUpload = ({
   shapeRef,
   syncShapeInStorage,
 }: ImageUpload) => {
+  if (!file) return;
+
   const reader = new FileReader();
 
-  reader.onload = () => {
-    fabric.Image.fromURL(reader.result as string, (img) => {
-      img.scaleToWidth(200);
-      img.scaleToHeight(200);
+  reader.onload = async () => {
+    const img = await fabric.Image.fromURL(reader.result as string);
+    if (!img) return;
 
-      canvas.current.add(img);
+    img.scaleToWidth(200);
+    img.scaleToHeight(200);
 
-      img.set("objectId", uuidv4());
+    canvas.current.add(img);
 
-      shapeRef.current = img;
+    img.set("objectId", uuidv4());
 
-      syncShapeInStorage(img);
-      canvas.current.requestRenderAll();
-    });
+    shapeRef.current = img;
+
+    syncShapeInStorage(img);
+    canvas.current.requestRenderAll();
   };
 
   reader.readAsDataURL(file);
@@ -121,7 +126,7 @@ export const handleImageUpload = ({
 
 export const createShape = (
   canvas: fabric.Canvas,
-  pointer: PointerEvent,
+  pointer: fabric.Point,
   shapeType: string
 ) => {
   if (shapeType === "freeform") {
@@ -181,9 +186,9 @@ export const bringElement = ({
   if (!selectedElement || selectedElement.type === "activeSelection") return;
 
   if (direction === "front") {
-    canvas.bringToFront(selectedElement);
+    canvas.bringObjectToFront(selectedElement);
   } else if (direction === "back") {
-    canvas.sendToBack(selectedElement);
+    canvas.sendObjectToBack(selectedElement);
   }
 
   syncShapeInStorage(selectedElement);

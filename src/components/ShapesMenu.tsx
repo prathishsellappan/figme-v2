@@ -3,7 +3,9 @@ import { ShapesMenuProps } from "../types/IEditorProps";
 import { Button } from "./common/ui/button";
 
 export default function ShapesMenu({ item, activeElement, handleActiveElement, handleImageUpload, imageInputRef }: ShapesMenuProps) {
-  const isDropdownElem = item.value.some((elem) => elem?.value === activeElement.value);
+  const currentValue = activeElement?.value;
+  const currentIcon = activeElement?.icon;
+  const isDropdownElem = item.value.some((elem) => elem?.value === currentValue);
 
   return (
     <>
@@ -11,9 +13,9 @@ export default function ShapesMenu({ item, activeElement, handleActiveElement, h
         <DropdownMenuTrigger>
           <div className="flex items-center w-[40px]">
             <Button variant="noneUse" size="icon"
-              onClick={() => handleActiveElement(item)}>
+              onClick={() => handleActiveElement(item.value[0])}>
               <img
-                src={isDropdownElem ? activeElement.icon : item.icon}
+                src={isDropdownElem && currentIcon ? currentIcon : item.icon}
                 alt={item.name}
                 className={isDropdownElem ? "invert" : ""}
                 width={17}
@@ -32,7 +34,7 @@ export default function ShapesMenu({ item, activeElement, handleActiveElement, h
               onClick={() => handleActiveElement(elem)}
               className={`flex h-fit  justify-between gap-10 
               rounded-none px-5 py-3 focus:border-none
-               ${activeElement.value === elem?.value ?
+               ${currentValue === elem?.value ?
                   "bg-green-500" : "hover:bg-gray-500"
                 }`}
             >
@@ -42,11 +44,11 @@ export default function ShapesMenu({ item, activeElement, handleActiveElement, h
                   alt={elem?.name as string}
                   width={20}
                   height={20}
-                  className={activeElement.value === elem?.value ? "invert" : ""}
+                  className={currentValue === elem?.value ? "invert" : ""}
                 />
                 <p
                   className={`text-sm 
-                  ${activeElement.value === elem?.value ?
+                  ${currentValue === elem?.value ?
                       "text-black" : "text-white"}`}
                 >
                   {elem?.name}

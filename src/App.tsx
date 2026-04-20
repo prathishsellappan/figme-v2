@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import MainApp from './routes/AppRouter';
-import Room from './pages/Editor/Room';
 
 const App: React.FC = () => {
   return (

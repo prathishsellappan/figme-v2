@@ -82,16 +82,9 @@ export function AuthFormGeneric({ loginOrRegister }: AuthFormGenericProp) {
     }
   };
 
-  const [isFocusedE, setIsFocusedEmail] = useState(false);
-  const [isFocusedP, setIsFocusedPassword] = useState(false);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  if (state.loading) {
+    return <p>Loading...</p>;
+  }
 
   return (
     <Form {...form}>

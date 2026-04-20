@@ -59,7 +59,7 @@ export default function SideNavBar({ onRecentClick, onDraftClick, recActive, dra
                     onClick={onDraftClick}
                 >
                     <img src={draftIcon} alt="draftIcon" width={17} />
-                    <p className="text-[15px]">Draft</p>
+                    <p className="text-[15px]">Drafts (soon)</p>
                 </div>
             </div>
 
