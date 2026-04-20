@@ -3,10 +3,10 @@ import { SideNavBarProp } from "../../../types/IDashBoardProp";
 import { draftIcon,  notificationIcon, recentIcon, searchIcon } from "../../../utils";
 import { logOut } from "../../../utils/auth/logOut";
 import { Input } from "../../common/ui/input";
-import PlansBox from "../../common/ui/PlansBox";
+
 
 export default function SideNavBar({ onRecentClick, onDraftClick, recActive, draftActive }: SideNavBarProp) {
-    const { dispatch } = useAuth();
+    const { state: { user }, dispatch } = useAuth();
 
     const logoutHandler = async () => {
         try {
@@ -24,10 +24,10 @@ export default function SideNavBar({ onRecentClick, onDraftClick, recActive, dra
                 {/* User Profile */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-[13px]">
-                        <div className="bg-green-500 rounded-full w-7 h-7 flex items-center justify-center text-white text-sm">
-                            O
+                        <div className="bg-green-500 rounded-full w-7 h-7 flex items-center justify-center text-white text-sm uppercase">
+                            {user?.displayName?.[0] || user?.email?.[0] || 'U'}
                         </div>
-                        <p className="text-white text-[15px] font-medium">Osama Zaid</p>
+                        <p className="text-white text-[15px] font-medium">{user?.displayName || user?.email?.split('@')[0] || 'User'}</p>
                     </div>
                     <div className="cursor-pointer">
                         <img src={notificationIcon} alt="notification" width={20} />
@@ -63,19 +63,11 @@ export default function SideNavBar({ onRecentClick, onDraftClick, recActive, dra
                 </div>
             </div>
 
-            <div className="border-b-[0.5px] w-full border-borderColor"></div>
-
-            <PlansBox />
-
-            <div className="border-b-[0.5px] w-full border-borderColor"></div>
+            {/* Removed PlansBox and separators */}
 
             <div className="flex-none mt-auto absolute bottom-0">
-                <div className="text-white p-5 pb-2 cursor-pointer flex items-center  gap-4">
-                    <span className="hover:opacity-20 transition-all duration-200 text-sm">Explore Community </span>
-                </div>
-
-                <div className="text-white p-5 pt-0 cursor-pointer flex items-center  gap-4">
-                    <span  onClick={logoutHandler} className="hover:text-red-600 transition-all duration-200 text-sm">Log out</span>
+                <div className="text-white p-5 cursor-pointer flex items-center gap-4">
+                    <span onClick={logoutHandler} className="hover:text-red-600 transition-all duration-200 text-sm">Log out</span>
                 </div>
 
             </div>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { ActiveElement, NavbarProps } from "../../../types/IEditorProps";
 import { FigmaLogoOutlineIcon, navElements } from "../../../utils";
 import ShapesMenu from "../../ShapesMenu";
@@ -19,10 +20,9 @@ export default function Navbar({ activeElement, handleActiveElement, imageInputR
         border-b-[0.5px] border-borderColor z-2
         bg-backgroundDash text-white">
             <div className="flex flex-row">
-                <div className="p-3 pl-2  flex items-center 
-                 justify-center border-r-[0.5px] border-borderColor">
+                <Link to="/dashboard" className="p-3 pl-2 flex items-center justify-center border-r-[0.5px] border-borderColor hover:bg-borderColor transition-colors">
                     <img className="cursor-pointer" src={FigmaLogoOutlineIcon} alt="FigLogo" width={30} height={20} />
-                </div>
+                </Link>
 
                 <ul className="flex flex-row">
                     {navElements.map((item: ActiveElement | any) => (

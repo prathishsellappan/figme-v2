@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../../../contexts/AuthContext";
+import { db } from "../../../utils/firebase-config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 interface DesignFilePopProps {
   openClose: boolean; // Define openClose prop
@@ -9,17 +12,38 @@ interface DesignFilePopProps {
 const DesignFilePop: React.FC<DesignFilePopProps> = ({ openClose, setShowModal }) => {
   const [fileName, setFileName] = useState("");
   const [redirect, setRedirect] = useState(false);
+  const [redirectId, setRedirectId] = useState("");
+  const [redirectName, setRedirectName] = useState("");
 
-  const handleSubmit = () => {
-    setShowModal(false); // Close modal when submitting
-    setRedirect(true)
-    setFileName("")
-    console.log(fileName)
+  const { state: { user } } = useAuth();
+
+  const handleSubmit = async () => {
+    if (!user) return;
+    
+    try {
+      const docName = fileName || "Untitled";
+      const docRef = await addDoc(collection(db, "files"), {
+        name: docName,
+        userId: user.uid,
+        userEmail: user.email,
+        createdAt: serverTimestamp(),
+        type: "draft",
+        isPublic: false,
+        allowedEmails: [] 
+      });
+      setRedirectId(docRef.id);
+      setRedirectName(docName);
+      setShowModal(false); 
+      setRedirect(true);
+    } catch (error) {
+      console.error("Error saving file:", error);
+      alert("Error creating file. Please try again.");
+    }
   };
 
   return (
     <>
-      {redirect && <Navigate to="/editor" />}
+      {redirect && <Navigate to={`/editor?id=${redirectId}&name=${encodeURIComponent(redirectName)}`} />}
       {/* TODO: chagne this to form from UI lib */}
       {/* TODO: ADD ALL THE FORM PROPTRIS + BEST PRACTIS SOON */}
       {openClose ? (

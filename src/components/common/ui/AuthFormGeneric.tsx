@@ -3,7 +3,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { useAuth } from "../../../contexts/AuthContext";
 import { AuthFormGenericProp } from "../../../types/AuthProps";
-import { Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "./button";
 import {
   Form,
@@ -40,6 +40,9 @@ const formSchema = z.object({
 export function AuthFormGeneric({ loginOrRegister }: AuthFormGenericProp) {
   const { state, dispatch } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname + (location.state?.from?.search || "") || "/dashboard";
 
   if (state.loading) {
     return <p>Loading...</p>;
@@ -52,7 +55,7 @@ export function AuthFormGeneric({ loginOrRegister }: AuthFormGenericProp) {
         const userLogin = await logInWithEmail(values);
         if (userLogin) {
           dispatch({ type: "LOGIN", payload: userLogin });
-          navigate("/dashboard");
+          navigate(from, { replace: true });
         } else {
           // TODO: ERROR component handling
             //!delete this   

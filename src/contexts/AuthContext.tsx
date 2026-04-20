@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, setPersistence, browserSessionPersistence } from 'firebase/auth';
 import { auth } from '../utils/firebase-config';
 import { AuthState, AuthAction } from "../types/AuthProps";
 
@@ -29,6 +29,12 @@ const AuthContext = createContext<{ state: AuthState; dispatch: React.Dispatch<A
 // Define the AuthProvider component that will wrap the application and provide the authentication context
 const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+
+  useEffect(() => {
+    // Set persistence to session state, so each tab can have a different user
+    setPersistence(auth, browserSessionPersistence)
+      .catch((error) => console.error("Persistence error:", error));
+  }, []);
 
   // Use the useEffect hook to subscribe to the Firebase authentication state changes
   useEffect(() => {

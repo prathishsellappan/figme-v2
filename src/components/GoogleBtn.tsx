@@ -1,4 +1,4 @@
-import { redirect } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { googleIcon } from "../utils"
 import { Button } from "./common/ui/button"
@@ -6,6 +6,10 @@ import { signUpWithGoogle } from "../utils/auth/signUpWithGoogle";
 
 export default function GoogleBtn() {
     const { state, dispatch } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const from = location.state?.from?.pathname + (location.state?.from?.search || "") || "/dashboard";
 
     if (state.loading) return <p>Loading...</p>
     
@@ -13,7 +17,7 @@ export default function GoogleBtn() {
         const user = await signUpWithGoogle();
         if (user) {
           dispatch({ type: 'LOGIN', payload: user });
-          redirect("/dashboard")
+          navigate(from, { replace: true });
     
         } else {
           console.log("Failed");

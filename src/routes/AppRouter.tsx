@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import NotFound from '../pages/NotFound';
 import ProtectedRoutes from '../utils/routes/ProtectedRoutes';
 
@@ -56,9 +56,7 @@ const AppRouter: React.FC = () => {
 };
 
 const MainApp: React.FC = () => (
-  <Router>
-    <AppRouter />
-  </Router>
+  <AppRouter />
 );
 
 export default MainApp;

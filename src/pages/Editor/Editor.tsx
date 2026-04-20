@@ -1,4 +1,8 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { db } from "../../utils/firebase-config";
+import { doc, getDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { useAuth } from "../../contexts/AuthContext";
 import Navbar from "../../components/layout/editor/Navbar";
 import { ActiveElement, Attributes } from "../../types/IEditorProps";
 import Live from "../../components/Live";
@@ -18,6 +22,54 @@ import { LiveMap } from "@liveblocks/client";
 import { ConnectivityStatus } from "../../components/ui/ConnectivityStatus";
 
 export default function Editor() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { state: { user } } = useAuth();
+  const fileId = searchParams.get("id");
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [checkingAccess, setCheckingAccess] = useState(true);
+
+  useEffect(() => {
+    const checkFileAccess = async () => {
+      if (!fileId) {
+        setCheckingAccess(false);
+        return;
+      }
+
+      try {
+        const docRef = doc(db, "files", fileId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const isOwner = data.userId === user?.uid;
+          const isPublic = data.isPublic;
+          const isAllowed = data.allowedEmails?.includes(user?.email);
+
+          if (!isOwner && !isPublic && !isAllowed) {
+            setAccessDenied(true);
+            alert("You do not have permission to access this file.");
+            navigate("/dashboard");
+          } else if (!isOwner && !isAllowed) {
+            // If it's a public file or they just got invited, make sure they are in allowedEmails
+            // so it shows on their dashboard
+            await updateDoc(docRef, {
+              allowedEmails: arrayUnion(user?.email)
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error checking access:", error);
+      } finally {
+        setCheckingAccess(false);
+      }
+    };
+
+    if (user) {
+      checkFileAccess();
+    }
+  }, [fileId, user, navigate]);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<Canvas | null>(null);
 
@@ -217,11 +269,13 @@ export default function Editor() {
 
 
   useEffect(() => {
+    if (checkingAccess) return;
+    
     const disposeCanvas = initializeAndRenderCanvas();
     return () => {
-      disposeCanvas();
+      if (disposeCanvas) disposeCanvas();
     };
-  }, [canvasRef]);
+  }, [checkingAccess]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -239,6 +293,16 @@ export default function Editor() {
 
 
 
+
+  if (checkingAccess) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-[#1E1E1E] text-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (accessDenied) return null;
 
   return (
     <>

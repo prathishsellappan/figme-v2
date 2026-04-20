@@ -22,7 +22,7 @@ export const logInWithEmail = async (value: UserforForm): Promise<User | false> 
   } catch (error: any) {
     // TODO: ERROR component handling
     //!delete this   
-    alert("Login failed");
+    alert(`Login failed: ${error.message}`);
     console.error("Error during login with email:", error.code, error.message);
     return false;
   }

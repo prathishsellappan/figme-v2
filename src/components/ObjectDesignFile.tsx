@@ -1,10 +1,18 @@
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import PlanTypeBadge from "./common/ui/PlanTypeBadge";
 
 export default function ObjectDesignFile() {
-  // Get the folderName from the context  
-  // folderType -> drafts or recent, folderName -> Untitled
-  // Get the context of plan either free or premium
-  // create a useState to update the name or to display it...
+  const [searchParams] = useSearchParams();
+  const urlName = searchParams.get("name");
+  const [projectName, setProjectName] = useState(urlName || "Untitled");
+
+  useEffect(() => {
+    if (urlName) {
+      setProjectName(urlName);
+    }
+  }, [urlName]);
+
   return (
     <>
       <div className="flex items-center p-3 pl-2 pt-4 mr-64">
@@ -14,9 +22,10 @@ export default function ObjectDesignFile() {
           <span className="flex items-center">
             <input
               type="text"
-              defaultValue="Untitled"
-              className="w-20 bg-transparent border-none text-white 
-               focus:outline-none placeholder:text-white"/>
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              className="w-auto max-w-[200px] bg-transparent border-none text-white focus:outline-none placeholder:text-white font-medium"
+            />
             <PlanTypeBadge />
           </span>
         </h3>
